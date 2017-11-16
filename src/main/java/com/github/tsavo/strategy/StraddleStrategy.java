@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by evilg on 9/29/2017.
@@ -179,5 +180,18 @@ public class StraddleStrategy implements Strategy {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StraddleStrategy)) return false;
+        StraddleStrategy that = (StraddleStrategy) o;
+        return Objects.equals(straddle, that.straddle);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(straddle);
     }
 }

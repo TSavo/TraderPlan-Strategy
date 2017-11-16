@@ -1,6 +1,7 @@
 package com.github.tsavo.strategy;
 
 import com.github.tsavo.traderplan.exchange.Exchange;
+import com.github.tsavo.traderplan.exchange.NoWalletEntryException;
 import com.github.tsavo.traderplan.exchange.Order;
 import com.tsavo.trade.database.Reporter;
 import com.tsavo.trade.database.model.Pivot;
@@ -42,9 +43,14 @@ public class PivotStrategy implements Strategy {
     @Override
     public void findOpportunities() throws ExchangeException, NotAvailableFromExchangeException, NotYetImplementedForExchangeException, IOException {
         BigDecimal balance;
-        BigDecimal averagePrice;
+        BigDecimal averagePrice = BigDecimal.ZERO;
         balance = exchange.getBalance(currencyPair.base);
-        averagePrice = exchange.getAveragePrice(currencyPair);
+
+        try {
+            averagePrice = exchange.getAverageCost(currencyPair);
+        } catch (NoWalletEntryException e) {
+            e.printStackTrace();
+        }
 
         List<LimitOrder> lowestAsks = exchange.getLowestAsks(currencyPair);
         if (lowestAsks.size() == 0) {
@@ -78,7 +84,6 @@ public class PivotStrategy implements Strategy {
             try {
                 position.openOrder();
             } catch (Exception e) {
-                e.printStackTrace();
                 report("The pivot strategy for " + currencyPair + " couldn't open the order for " + tradeAmount + "! Error from the exchange: " + e.getMessage());
                 return;
             }
@@ -106,7 +111,6 @@ public class PivotStrategy implements Strategy {
 
             if(updateBuyAction) {
                 exchange.performBuyAction(pivot);
-
             }
 
 
@@ -134,7 +138,6 @@ public class PivotStrategy implements Strategy {
             try {
                 position.openOrder();
             } catch (Exception e) {
-                e.printStackTrace();
                 report("The pivot strategy for " + currencyPair + " couldn't open the order for " + amountToSell + "! Error from the exchange: " + e.getMessage());
                 return;
             }
